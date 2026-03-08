@@ -717,6 +717,16 @@ HIGH, MEDIUM, LOW, GAS
   }
 );
 
+// Tool 4: get_claudit_version
+server.tool(
+  "get_claudit_version",
+  "Returns the currently running version of the Claudit MCP server.",
+  {},
+  async () => ({
+    content: [{ type: "text" as const, text: `Claudit v${pkg.version}` }],
+  })
+);
+
 // ── Start ───────────────────────────────────────────────────────────────────
 
 async function main() {
