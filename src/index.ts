@@ -87,11 +87,12 @@ const cache = new SimpleCache();
 const SEARCH_CACHE_TTL = 5 * 60 * 1000; // 5 min
 
 // Index findings by ID for fast lookup by get_finding
-const findingsById = new Map<string, FindingData>();
+const findingsById = new SimpleCache();
+const FINDINGS_TTL = 30 * 60 * 1000; // 30 min
 
 function indexFindings(findings: FindingData[]): void {
   for (const f of findings) {
-    findingsById.set(f.id, f);
+    findingsById.set(f.id, f, FINDINGS_TTL);
   }
 }
 
@@ -486,7 +487,7 @@ server.tool(
     // Check if identifier is a numeric ID — instant lookup from cache
     const numericId = slug.replace(/^#/, "").trim();
     if (/^\d+$/.test(numericId)) {
-      const cached = findingsById.get(numericId);
+      const cached = findingsById.get<FindingData>(numericId);
       if (cached) {
         return {
           content: [{ type: "text" as const, text: formatFindingFull(cached) }],
