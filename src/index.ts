@@ -178,35 +178,48 @@ interface SoloditResponse {
 async function callSoloditAPI(body: SoloditRequest): Promise<SoloditResponse> {
   await rateLimiter.waitIfNeeded();
 
-  const res = await fetch(`${API_BASE}/findings`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Cyfrin-API-Key": API_KEY!,
-    },
-    body: JSON.stringify(body),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-  rateLimiter.update(res.headers);
+  try {
+    const res = await fetch(`${API_BASE}/findings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Cyfrin-API-Key": API_KEY!,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
 
-  if (!res.ok) {
-    const errBody = await res.text();
-    if (res.status === 401) {
+    clearTimeout(timeoutId);
+    rateLimiter.update(res.headers);
+
+    if (!res.ok) {
+      const errBody = await res.text();
+      if (res.status === 401) {
+        throw new Error(
+          `Invalid API key. Get a new one at: https://solodit.cyfrin.io → Profile → API Keys`
+        );
+      }
+      if (res.status === 429) {
+        throw new Error(
+          `Rate limited. Limit resets at ${new Date(rateLimiter.status().resetAt).toISOString()}. Try again shortly.`
+        );
+      }
       throw new Error(
-        `Invalid API key. Get a new one at: https://solodit.cyfrin.io → Profile → API Keys`
+        `Solodit API error (${res.status}): ${errBody.slice(0, 200)}`
       );
     }
-    if (res.status === 429) {
-      throw new Error(
-        `Rate limited. Limit resets at ${new Date(rateLimiter.status().resetAt).toISOString()}. Try again shortly.`
-      );
+
+    return (await res.json()) as SoloditResponse;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - Solodit API did not respond within 30 seconds');
     }
-    throw new Error(
-      `Solodit API error (${res.status}): ${errBody.slice(0, 200)}`
-    );
+    throw error;
   }
-
-  return (await res.json()) as SoloditResponse;
 }
 
 // ── Formatters ──────────────────────────────────────────────────────────────
