@@ -250,6 +250,9 @@ function formatFindingSummary(f: FindingData): string {
 }
 
 function formatFindingFull(f: FindingData): string {
+  // Helper to escape pipe characters that break Markdown tables
+  const esc = (s: string | undefined | null) => (s || "Unknown").replace(/\|/g, "\\|");
+
   const tags = (f.issues_issuetagscore ?? [])
     .map((t) => t?.tags_tag?.title ?? null)
     .filter((t): t is string => typeof t === "string" && t.length > 0)
@@ -270,23 +273,22 @@ function formatFindingFull(f: FindingData): string {
   let out = `# [${f.impact}] ${f.title}\n${url}\n\n`;
   out += `| Field | Value |\n|-------|-------|\n`;
   out += `| Severity | ${f.impact} |\n`;
-  out += `| Firm | ${f.firm_name || "Unknown"} |\n`;
-  out += `| Protocol | ${f.protocol_name || "Unknown"} |\n`;
-  if (categories) out += `| Categories | ${categories} |\n`;
+  out += `| Firm | ${esc(f.firm_name)} |\n`;
+  out += `| Protocol | ${esc(f.protocol_name)} |\n`;
+  if (categories) out += `| Categories | ${esc(categories)} |\n`;
   out += `| Quality | ${f.quality_score}/5 |\n`;
   out += `| Rarity | ${f.general_score}/5 |\n`;
-  if (tags) out += `| Tags | ${tags} |\n`;
-  if (finders) out += `| Finders | ${finders} (${f.finders_count}) |\n`;
+  if (tags) out += `| Tags | ${esc(tags)} |\n`;
+  if (finders) out += `| Finders | ${esc(finders)} (${f.finders_count}) |\n`;
   if (f.report_date) out += `| Date | ${f.report_date} |\n`;
-  if (f.contest_prize_txt) out += `| Prize Pool | ${f.contest_prize_txt} |\n`;
-  if (f.sponsor_name) out += `| Sponsor | ${f.sponsor_name} |\n`;
+  if (f.contest_prize_txt) out += `| Prize Pool | ${esc(f.contest_prize_txt)} |\n`;
+  if (f.sponsor_name) out += `| Sponsor | ${esc(f.sponsor_name)} |\n`;
   out += `| Solodit | ${url} |\n`;
   if (f.github_link) out += `| GitHub | ${f.github_link} |\n`;
   out += `\n---\n\n`;
   out += f.content || "(no content)";
   return out;
 }
-
 // ── MCP Server ──────────────────────────────────────────────────────────────
 
 const server = new McpServer({
