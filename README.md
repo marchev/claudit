@@ -9,6 +9,7 @@ Search [Solodit](https://solodit.cyfrin.io)'s 20,000+ audit findings from Claude
 [![npm version](https://img.shields.io/npm/v/@marchev/claudit?style=flat-square&color=cb3837)](https://www.npmjs.com/package/@marchev/claudit)
 [![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![node](https://img.shields.io/node/v/@marchev/claudit?style=flat-square&color=417e38)](package.json)
+[![giveth](https://img.shields.io/badge/Giveth-Support%20Claudit-5326EC?style=flat-square)](https://giveth.io/project/claudit-0)
 
 <br />
 
@@ -191,6 +192,14 @@ SOLODIT_API_KEY=sk_your_key node dist/index.js
 ```
 
 </details>
+
+---
+
+## Support
+
+Claudit is a solo-maintained public good for Ethereum security. If it saves you time or finds bugs for you, consider supporting its continued development on Giveth:
+
+**[giveth.io/project/claudit-0](https://giveth.io/project/claudit-0)**
 
 ---
 
